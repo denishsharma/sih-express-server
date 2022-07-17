@@ -1,0 +1,30 @@
+{
+    "name": "sih-express-server",
+    "version": "1.0.0",
+    "description": "SIH Node Express Server with Sequelize ORM support and Truffle for Smart Contract development.",
+    "main": "index.js",
+    "scripts": {
+        "server": "nodemon index.js",
+        "resync": "node ./app/resync.js",
+        "truffle:migrate-dev": "truffle migrate -network development",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "Denish Sharma",
+    "license": "ISC",
+    "dependencies": {
+        "@truffle/contract": "^4.5.17",
+        "bcrypt": "^5.0.1",
+        "body-parser": "^1.20.0",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "crypto-js": "^4.1.1",
+        "dotenv": "^16.0.1",
+        "express": "^4.18.1",
+        "jsonwebtoken": "^8.5.1",
+        "mysql2": "^2.3.3",
+        "nodemon": "^2.0.19",
+        "sequelize": "^6.21.3",
+        "web3": "^1.7.4"
+    }
+}
