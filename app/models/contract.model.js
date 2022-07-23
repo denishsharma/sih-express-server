@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-    class Server extends Model {
+    class Contract extends Model {
         static associate(models) {
             // define association here
         }
@@ -18,19 +18,22 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        username: {
+        contractKey: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
         },
-        password: {
+        address: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        apiKey: {
+        networkId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        deployer: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
         },
     };
 
@@ -39,9 +42,9 @@ module.exports = (sequelize) => {
     const options = {
         sequelize,
         validate: validators,
-        modelName: "Server",
+        modelName: "Contract",
     };
 
-    Server.init(attributes, options);
-    return Server;
+    Contract.init(attributes, options);
+    return Contract;
 };

@@ -1,7 +1,7 @@
 const { Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-    class User extends Model {
+    class Transaction extends Model {
         static associate(models) {
             // define association here
         }
@@ -14,20 +14,6 @@ module.exports = (sequelize) => {
             primaryKey: true,
             unique: true,
         },
-        userKey: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-        },
-        address: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-        },
-        secret: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
     };
 
     const validators = {};
@@ -35,9 +21,9 @@ module.exports = (sequelize) => {
     const options = {
         sequelize,
         validate: validators,
-        modelName: "User",
+        modelName: "Transaction",
     };
 
-    User.init(attributes, options);
-    return User;
+    Transaction.init(attributes, options);
+    return Transaction;
 };

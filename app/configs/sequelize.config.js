@@ -4,6 +4,7 @@ const path = require("path");
 
 const paths = {
     models: path.resolve("app", "models"),
+    seeders: path.resolve("app", "seeders"),
 };
 
 const development = {
@@ -13,9 +14,6 @@ const development = {
     host: process.env.DATABASE_HOST || "localhost",
     port: process.env.DATABASE_PORT || 3306,
     dialect: process.env.DATABASE_DIALECT || "mysql",
-    dialectOptions: {
-        bigNumberString: true,
-    },
 };
 
 module.exports = {

@@ -14,7 +14,11 @@ const sequelize = new Sequelize(
         logging: console.log,
         logQueryParameters: true,
         benchmark: true,
-    }
+        define: {
+            underscored: true,
+            paranoid: true,
+        },
+    },
 );
 
 const seq = {};
