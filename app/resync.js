@@ -1,12 +1,15 @@
-const { sequelize } = require('./sequelize');
+const { sequelize } = require("./sequelize");
 
-function sequelizeSync() {
-    console.log('Syncing database...');
-    sequelize.sync({ force: true }).then(() => {
-        console.log('Sync database OK!');
+const args = process.argv.slice(2);
+const force = (args[0].toLowerCase() === "force") || false;
+
+function sequelizeSync(force) {
+    console.log("Syncing database...");
+    sequelize.sync({ alter: true, force }).then(() => {
+        console.log("Sync database OK!");
     }).catch((e) => {
-        console.log('Failed to sync database: ' + e.message);
-    })
+        console.log("Failed to sync database: " + e.message);
+    });
 }
 
-sequelizeSync();
+sequelizeSync(force);

@@ -3,10 +3,7 @@ const { isRequestEmpty } = require("../utils/requests.util");
 const { web3 } = require("../utils/web3.utils");
 const { createUserToken, decodeToken } = require("../utils/jwt.utils");
 const { lockUserAddress, unlockUserAddress } = require("../utils/secure.util");
-const {
-    createTransaction,
-    sendSignedTransaction,
-} = require("../utils/wallet.util");
+const { createTransaction, sendSignedTransaction } = require("../utils/wallet.util");
 const Op = Sequelize.Op;
 
 exports.token = async (req, res) => {
