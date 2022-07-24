@@ -16,7 +16,12 @@ if (seedAll) {
         console.log("Seeding database...");
         for (const seederName of Object.keys(seeders)) {
             console.log(`${seederName} seeder...`);
-            await seeders[seederName].seed();
+            try {
+                await seeders[seederName].seed();
+            } catch (error) {
+                console.log(`${seederName} seeder error: ${error.message}`);
+                throw error;
+            }
             console.log(`${seederName} seeder OK!`);
         }
         console.log("Seeding database OK!");
