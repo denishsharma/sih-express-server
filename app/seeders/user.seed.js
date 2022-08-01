@@ -30,12 +30,14 @@ exports.seed = async () => {
     ]);
 
     const seedAccount = process.env.SEED_ACCOUNT_ADDRESS;
-    const seedAccountSecret = process.env.SEED_ACCOUNT_SECRET;
+    const seedAccountSecret = process.env.SEED_ACCOUNT_PRIVATE;
+
+    console.log(seedAccount, seedAccountSecret);
 
     for (let userKey in userAddresses) {
         console.log(`Seeding balance of ${userKey}: ${userAddresses[userKey]}...`);
         const userAddress = userAddresses[userKey];
-        const txReceipt = await transferEther(seedAccount, userAddress, Web3.utils.fromWei("2", "ether"), seedAccountSecret);
+        const txReceipt = await transferEther(seedAccount, userAddress, Web3.utils.toWei("2", "ether"), seedAccountSecret);
         console.log(`User ${userKey} balance seeded with 2 ether. (${txReceipt.transactionHash})`);
     }
 };
