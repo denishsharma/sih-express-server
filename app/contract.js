@@ -14,10 +14,15 @@ const state = {
 };
 
 let migrationMeta = {};
+const migrationMetaPath = path.join(config.contractsRoot, "migrations", "contracts.migration.meta.json");
 if (fs.existsSync(path.join(config.migrationsPath, "contracts.migration.meta.json"))) {
-    migrationMeta = require("./contracts/migrations/contracts.migration.meta.json");
+    migrationMeta = require(migrationMetaPath);
 } else {
     migrationMeta = JSON.parse(fs.readFileSync(path.join(config.migrationsPath, "contracts.migration.meta.template.json"), "utf8"));
+}
+
+if (!fs.existsSync(path.join(config.contractsRoot, "deployed"))) {
+    fs.mkdirSync(path.join(config.contractsRoot, "deployed"));
 }
 
 const deployDiff = async () => {
@@ -37,8 +42,11 @@ const deployDiff = async () => {
         console.log("Migrated contracts OK!");
     }
     console.log("All contracts are migrated!");
+};
 
+const loadDeployed = async () => {
     console.log("Loading deployed contracts...");
+
     const includeContracts = Object.keys(migrationMeta.contracts).filter(contractName => migrationMeta.contracts[contractName].include && migrationMeta.contracts[contractName].deployed);
 
     const networkId = await web3.eth.net.getId();
@@ -59,29 +67,6 @@ const deployDiff = async () => {
     fs.writeFileSync(config.contractsRoot + "/index.js", statements);
 
     console.log("Loaded deployed contracts OK!");
-};
-
-const loadDeployed = async () => {
-    console.log("Loading deployed contracts...");
-    const networkId = await web3.eth.net.getId();
-    const importStatements = ["const { web3 } = require('../utils/web3.utils');"];
-    const assignStatements = ["const contracts = {};"];
-
-    for (const file of fs.readdirSync(config.deployedPath)) {
-        const contractName = file.split(".")[0];
-        importStatements.push(`const ${contractName} = require("./deployed/${contractName}.deployed.js")(web3, ${networkId});`);
-        assignStatements.push(`contracts.${contractName} = ${contractName};`);
-    }
-
-    assignStatements.push("module.exports = contracts;");
-
-    const importStatementsString = importStatements.join("\n");
-    const assignStatementsString = assignStatements.join("\n");
-    const statements = importStatementsString + "\n" + assignStatementsString;
-
-    fs.writeFileSync(config.contractsRoot + "/index.js", statements);
-
-    console.log("Loaded compiled contracts OK!");
 };
 
 const migrateSingle = async (contractName) => {
@@ -111,4 +96,5 @@ const migrateAll = async () => {
     } else if (state.deployDiff) {
         await deployDiff();
     }
+    process.exit();
 })(state);
