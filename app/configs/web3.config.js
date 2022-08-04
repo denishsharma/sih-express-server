@@ -18,6 +18,12 @@ const config = {
             network_id: process.env.DEV_NETWORK_ID || "*",
         },
     },
+    metaAccounts: {
+        env: {
+            publicAddress: process.env.META_ACCOUNT_ADDRESS,
+            privateKey: process.env.META_ACCOUNT_PRIVATE,
+        },
+    },
 };
 
 module.exports = config;

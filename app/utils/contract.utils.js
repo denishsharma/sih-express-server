@@ -79,45 +79,53 @@ exports.getEvents = (contract, subscriptionList) => {
         };
 
         eventObject.subscribe = async (options, handler) => {
-            options = Object.assign({}, options, {
-                address: contract.options.address,
-                topics: [eventObject.signature],
-            });
+            try {
+                options = Object.assign({}, options, {
+                    address: contract.options.address,
+                    topics: [eventObject.signature],
+                });
 
-            eventObject.subscription = web3.eth.subscribe("logs", options, (error, result) => {
-                if (!error) {
-                    const eventResult = web3.eth.abi.decodeLog(eventObject.inputs, result.data, result.topics.slice(1));
-                    typeof handler === "function" && handler(error, eventResult, result);
-                } else {
-                    typeof handler === "function" && handler(error, null, null);
-                }
-            });
+                eventObject.subscription = web3.eth.subscribe("logs", options, (error, result) => {
+                    if (!error) {
+                        const eventResult = web3.eth.abi.decodeLog(eventObject.inputs, result.data, result.topics.slice(1));
+                        typeof handler === "function" && handler(error, eventResult, result);
+                    } else {
+                        typeof handler === "function" && handler(error, null, null);
+                    }
+                });
 
-            subscriptionList.contracts[contract._contractName][eventObject.name] = eventObject;
+                subscriptionList.contracts[contract._contractName][eventObject.name] = eventObject;
 
-            console.log(`Subscribed to event '${eventObject.name}' of contract '${contract._contractName}'`);
+                console.log(`Subscribed to event '${eventObject.name}' of contract '${contract._contractName}'`);
+            } catch (error) {
+                console.log(error);
+            }
         };
 
         eventObject.getPastEvents = (options, handler) => {
             !("dataFilter" in options) && (options.dataFilter = {});
 
             contract.getPastEvents(eventObject.name, options, (error, result) => {
-                if (!error) {
-                    let eventResult = result;
-                    if (options.dataFilter && Object.keys(options.dataFilter).length > 0) {
-                        eventResult = result.filter((item) => {
-                            const returnData = item.returnValues;
-                            const dataFilterFlag = {};
-                            for (let dataFilterKey in options.dataFilter) {
-                                dataFilterFlag[dataFilterKey] = options.dataFilter[dataFilterKey] === returnData[dataFilterKey];
-                            }
+                try {
+                    if (!error) {
+                        let eventResult = result;
+                        if (options.dataFilter && Object.keys(options.dataFilter).length > 0) {
+                            eventResult = result.filter((item) => {
+                                const returnData = item.returnValues;
+                                const dataFilterFlag = {};
+                                for (let dataFilterKey in options.dataFilter) {
+                                    dataFilterFlag[dataFilterKey] = options.dataFilter[dataFilterKey] === returnData[dataFilterKey];
+                                }
 
-                            return Object.values(dataFilterFlag).every(f => f === true);
-                        });
+                                return Object.values(dataFilterFlag).every(f => f === true);
+                            });
+                        }
+                        typeof handler === "function" && handler(error, eventResult);
+                    } else {
+                        typeof handler === "function" && handler(error, null);
                     }
-                    typeof handler === "function" && handler(error, eventResult);
-                } else {
-                    typeof handler === "function" && handler(error, null);
+                } catch (error) {
+                    console.log(error);
                 }
             });
         };
