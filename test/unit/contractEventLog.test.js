@@ -1,17 +1,17 @@
 const Web3 = require("web3");
-let networkProvider = 'ws://localhost:7545';
+let networkProvider = "ws://localhost:7545";
 
 let web3Provider = new Web3.providers.WebsocketProvider(networkProvider);
 web3 = new Web3(web3Provider);
 
-const AddNumbers = require("../app/contracts/deployed/AddNumbers.deployed")(web3, 5777);
+const AddNumbers = require("../../app/contracts/deployed/AddNumbers.deployed")(web3, 5777);
 
 const subscribedEvents = {};
 const events = {};
 
 const subscribeLogEvent = (eventName) => {
     const eventJsonInterface = SimpleStorage._jsonInterface.filter((item) => item.name === eventName && item.type === "event")[0];
-    subscribedEvents[eventName] = web3.eth.subscribe('logs', {
+    subscribedEvents[eventName] = web3.eth.subscribe("logs", {
         address: SimpleStorage.options.address,
         topics: [eventJsonInterface.signature],
     }, (error, result) => {
@@ -21,9 +21,8 @@ const subscribeLogEvent = (eventName) => {
         }
     });
 
-    console.log(`subscribed to event '${eventName}' of contract '${SimpleStorage._contractName}' `)
-}
-
+    console.log(`subscribed to event '${eventName}' of contract '${SimpleStorage._contractName}' `);
+};
 
 
 (async () => {
@@ -34,32 +33,32 @@ const subscribeLogEvent = (eventName) => {
 
     // console.log(pastEvents);
 
-    const eventsInterface = AddNumbers._jsonInterface.filter((item) => item.type === 'event');
+    const eventsInterface = AddNumbers._jsonInterface.filter((item) => item.type === "event");
 
     const eventObjects = {};
 
-    for(let eventInterface in eventsInterface) {
+    for (let eventInterface in eventsInterface) {
         eventInterface = eventsInterface[eventInterface];
 
         const eventObject = {
             name: eventInterface.name,
             signature: eventInterface.signature,
             inputs: eventInterface.inputs,
-        }
+        };
 
         eventObject.subscribe = (handler) => {
             console.log(`subscribed to event '${eventObject.name}' of contract '${AddNumbers._contractName}' `);
-        }
+        };
 
         eventObject.unsubscribe = () => {
             console.log(`unsubscribed from event '${eventObject.name}' of contract '${AddNumbers._contractName}' `);
-        }
+        };
 
-        eventObjects[eventInterface.name] = eventObject
+        eventObjects[eventInterface.name] = eventObject;
     }
 
 
-    eventObjects['numberAdded'].subscribe();
+    eventObjects["numberAdded"].subscribe();
 
     // await SimpleStorage.events.numberChanged({}).on('data', (event) => console.log(event));
 
