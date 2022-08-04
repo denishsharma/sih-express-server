@@ -1,8 +1,8 @@
 require("dotenv").config();
 
 const Web3 = require("web3");
-const protocol = process.env.DEV_NETWORK_PROTOCOL || 'ws';
-const networkProvider = `${protocol}://${process.env.DEV_NETWORK_HOST || 'localhost'}:${process.env.DEV_NETWORK_PORT || '7545'}`;
+const protocol = process.env.DEV_NETWORK_PROTOCOL || "ws";
+const networkProvider = `${protocol}://${process.env.DEV_NETWORK_HOST || "localhost"}:${process.env.DEV_NETWORK_PORT || "7545"}`;
 
 const web3 = new Web3();
 let provider;

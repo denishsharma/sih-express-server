@@ -1,4 +1,4 @@
-const { getBearerToken } = require("../utils/requests.util");
+const { getBearerToken } = require("../utils/requests.utils");
 const { validateToken } = require("../utils/jwt.utils");
 
 exports.validateServerToken = (req, res, next) => {

@@ -26,4 +26,8 @@ app.use("/user", validateServerToken, userRoutes);
 app.use("/simpleStorage", validateServerToken, simpleStorageRoutes);
 app.use("/volunteerProfile", validateServerToken, volunteerProfileRoutes);
 
+// Test Routes
+app.get('/test/get', (req, res) => { res.json({ data: 'get-route' }) });
+app.post('/test/post', (req, res) => { res.json({ data: req.body, message: 'post-route' }) });
+
 module.exports = app;

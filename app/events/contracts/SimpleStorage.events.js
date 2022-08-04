@@ -1,4 +1,4 @@
-const subscribedEvents = require('../events.subscription');
+const subscribedEvents = require("../events.subscription");
 
 const { SimpleStorage } = require("../../contracts");
 const { getEvents } = require("../../utils/contract.utils");

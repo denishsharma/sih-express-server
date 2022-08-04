@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const { User } = require("../sequelize");
-const { transferEther } = require("../utils/wallet.util");
+const { transferEther } = require("../utils/wallet.utils");
 const Web3 = require("web3");
 
 exports.seed = async () => {
