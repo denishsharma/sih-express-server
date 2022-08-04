@@ -1,6 +1,6 @@
-const {Server, Sequelize} = require("../sequelize");
-const {isRequestEmpty} = require("../utils/requests.util");
-const {createServerToken} = require("../utils/jwt.utils");
+const { Server, Sequelize } = require("../sequelize");
+const { isRequestEmpty } = require("../utils/requests.utils");
+const { createServerToken } = require("../utils/jwt.utils");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const Op = Sequelize.Op;
@@ -12,13 +12,13 @@ exports.index = (req, res) => {
 // Register new server
 exports.register = async (req, res) => {
     if (isRequestEmpty(req)) {
-        res.status(400).json({message: "Empty request body"});
+        res.status(400).json({ message: "Empty request body" });
         return;
     }
 
-    const {name, username, password} = req.body;
+    const { name, username, password } = req.body;
 
-    if (await Server.findOne({where: {username}})) {
+    if (await Server.findOne({ where: { username } })) {
         res.status(400).json({
             message: `Server with username ${username} is already registered`,
         });
@@ -58,12 +58,12 @@ exports.register = async (req, res) => {
 // Authenticate server
 exports.authenticate = async (req, res) => {
     if (isRequestEmpty(req)) {
-        res.status(400).json({message: "Empty request body"});
+        res.status(400).json({ message: "Empty request body" });
         return;
     }
 
-    const {password, apiKey} = req.body;
-    const server = await Server.findOne({where: {apiKey}});
+    const { password, apiKey } = req.body;
+    const server = await Server.findOne({ where: { apiKey } });
 
     if (!server) {
         res.status(400).json({

@@ -1,7 +1,7 @@
 const { VolunteerProfile } = require("../contracts");
 const { decodeToken } = require("../utils/jwt.utils");
-const { unlockUserAddress } = require("../utils/secure.util");
-const { createTransaction, sendSignedTransaction } = require("../utils/wallet.util");
+const { unlockUserAddress } = require("../utils/secure.utils");
+const { createTransaction, sendSignedTransaction } = require("../utils/wallet.utils");
 const { web3 } = require("../utils/web3.utils");
 
 exports.giveEditorAccess = async (req, res) => {
@@ -9,7 +9,7 @@ exports.giveEditorAccess = async (req, res) => {
     const accounts = await web3.eth.getAccounts();
 
     try {
-        const txReceipt = await VolunteerProfile.methods['addEditorAccess'](address).send({ from: accounts[0] });
+        const txReceipt = await VolunteerProfile.methods["addEditorAccess"](address).send({ from: accounts[0] });
 
         res.json({
             txReceipt,
@@ -29,7 +29,7 @@ exports.revokeEditorAccess = async (req, res) => {
     const accounts = await web3.eth.getAccounts();
 
     try {
-        const txReceipt = await VolunteerProfile.methods['removeEditorAccess'](address).send({ from: accounts[0] });
+        const txReceipt = await VolunteerProfile.methods["removeEditorAccess"](address).send({ from: accounts[0] });
 
         res.json({
             txReceipt,

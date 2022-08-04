@@ -1,7 +1,7 @@
 const { decodeToken } = require("../utils/jwt.utils");
-const { unlockUserAddress } = require("../utils/secure.util");
+const { unlockUserAddress } = require("../utils/secure.utils");
 const { web3 } = require("../utils/web3.utils");
-const { createTransaction, sendSignedTransaction } = require("../utils/wallet.util");
+const { createTransaction, sendSignedTransaction } = require("../utils/wallet.utils");
 const { SimpleStorage } = require("../contracts");
 const Tx = require("ethereumjs-tx");
 

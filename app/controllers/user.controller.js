@@ -1,9 +1,9 @@
 const { User, Sequelize } = require("../sequelize");
-const { isRequestEmpty } = require("../utils/requests.util");
+const { isRequestEmpty } = require("../utils/requests.utils");
 const { web3 } = require("../utils/web3.utils");
 const { createUserToken, decodeToken } = require("../utils/jwt.utils");
-const { lockUserAddress, unlockUserAddress } = require("../utils/secure.util");
-const { createTransaction, sendSignedTransaction } = require("../utils/wallet.util");
+const { lockUserAddress, unlockUserAddress } = require("../utils/secure.utils");
+const { createTransaction, sendSignedTransaction } = require("../utils/wallet.utils");
 const Op = Sequelize.Op;
 
 exports.token = async (req, res) => {
@@ -17,11 +17,14 @@ exports.token = async (req, res) => {
     }
 
     const userToken = createUserToken(user);
+    const decoded = decodeToken(userToken);
+    const unlockedUserAddress = unlockUserAddress(decoded);
     res.json({
         data: {
             userKey,
             address: user.address,
             userToken,
+            secret: unlockedUserAddress.secret,
         },
         message: "User token created successfully.",
     });
@@ -138,11 +141,11 @@ exports.transfer = async (req, res) => {
                 value,
                 gas: "21000",
             },
-            unlockedUserAddress.secret
+            unlockedUserAddress.secret,
         );
 
         const transactionReceipt = await sendSignedTransaction(
-            signedTransaction
+            signedTransaction,
         );
 
         if (transactionReceipt) {
