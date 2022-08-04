@@ -9,7 +9,7 @@
         "resync:force": "node ./app/resync.js force",
         "db:seed": "node ./app/seeders/index.js seed-all",
         "contract:migrate:all": "truffle compile && node ./app/contract.js deploy-diff && node ./app/contract.js load-deployed",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test:unit": "node ./test/index.js test-unit-single"
     },
     "keywords": [],
     "author": "Denish Sharma",
