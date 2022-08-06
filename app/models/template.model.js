@@ -1,11 +1,7 @@
-const { Model, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-    class Template extends Model {
-        static associate(models) {
-            Template.hasMany(models.TemplateFields, { foreignKey: "templateId", as: "fields" });
-        }
-    }
+    const modelName = "Template";
 
     const attributes = {
         id: {
@@ -25,14 +21,13 @@ module.exports = (sequelize) => {
         },
     };
 
-    const validators = {};
+    const options = {};
 
-    const options = {
-        sequelize,
-        validate: validators,
-        modelName: "Template",
+    const Template = sequelize.define(modelName, attributes, options);
+
+    Template.associate = (models) => {
+        Template.hasMany(models.TemplateField, { foreignKey: "templateId", as: "fields" });
     };
 
-    Template.init(attributes, options);
     return Template;
 };

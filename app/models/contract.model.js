@@ -1,11 +1,7 @@
-const { Model, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-    class Contract extends Model {
-        static associate(models) {
-            // define association here
-        }
-    }
+    const modelName = "Contract";
 
     const attributes = {
         id: {
@@ -37,14 +33,11 @@ module.exports = (sequelize) => {
         },
     };
 
-    const validators = {};
+    const options = {};
 
-    const options = {
-        sequelize,
-        validate: validators,
-        modelName: "Contract",
-    };
+    const Contract = sequelize.define(modelName, attributes, options);
 
-    Contract.init(attributes, options);
+    Contract.associate = (models) => {};
+
     return Contract;
 };
