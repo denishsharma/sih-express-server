@@ -1,4 +1,5 @@
 const { Template, TemplateField } = require("../../app/sequelize");
+const { parseToJSONObject } = require("../../app/utils/general.utils");
 const bcrypt = require("bcrypt");
 
 const templateStructure = {
@@ -67,10 +68,10 @@ const someTest = async () => {
     // await seedTemplates();
 
     const templates = await Template.findAll({
-        include: [{ model: TemplateField }],
+        include: [{ model: TemplateField, as: "fields" }],
     });
 
-    console.log(templates);
+    console.log(parseToJSONObject(templates)[0].fields);
 };
 
 exports.test = async () => {
