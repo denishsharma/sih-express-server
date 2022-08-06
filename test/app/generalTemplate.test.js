@@ -63,6 +63,7 @@ const seedTemplates = async () => {
 };
 
 const someTest = async () => {
+    // Uncomment this when running test for first time
     // await seedTemplates();
 
     const templates = await Template.findAll({
