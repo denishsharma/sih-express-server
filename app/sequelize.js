@@ -30,6 +30,7 @@ fs.readdirSync(paths.models).forEach((file) => {
 
 Object.keys(seq).forEach((modelName) => {
     if (seq[modelName].associate) {
+        console.log(`Associating ${modelName}...`);
         seq[modelName].associate(seq);
     }
 });
