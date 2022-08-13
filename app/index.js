@@ -19,15 +19,19 @@ const serverRoutes = require("./routes/server.route");
 const userRoutes = require("./routes/user.route");
 const simpleStorageRoutes = require("./routes/simple-storage.route");
 const volunteerProfileRoutes = require("./routes/volunteer-profile.route");
+const idrnRoutes = require("./routes/idrn.route");
+const templateRoutes = require("./routes/template.route");
 
 // API Routes Declare
 app.use("/server", serverRoutes);
 app.use("/user", validateServerToken, userRoutes);
 app.use("/simpleStorage", validateServerToken, simpleStorageRoutes);
 app.use("/volunteerProfile", validateServerToken, volunteerProfileRoutes);
+app.use("/idrn", validateServerToken, idrnRoutes);
+app.use("/template", validateServerToken, templateRoutes);
 
 // Test Routes
-app.get('/test/get', (req, res) => { res.json({ data: 'get-route' }) });
-app.post('/test/post', (req, res) => { res.json({ data: req.body, message: 'post-route' }) });
+app.get("/test/get", (req, res) => { res.json({ data: "get-route" }); });
+app.post("/test/post", (req, res) => { res.json({ data: req.body, message: "post-route" }); });
 
 module.exports = app;
