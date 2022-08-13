@@ -33,6 +33,11 @@ Object.keys(seq).forEach((modelName) => {
         console.log(`Associating ${modelName}...`);
         seq[modelName].associate(seq);
     }
+
+    if (seq[modelName].registerMethods) {
+        console.log(`Registering methods for ${modelName}...`);
+        seq[modelName].registerMethods();
+    }
 });
 
 seq.sequelize = sequelize;
