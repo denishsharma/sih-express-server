@@ -1,5 +1,6 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Op } = require("sequelize");
 const { fieldOptionCheckDefaults, parseToJSONObject } = require("../utils/general.utils");
+const hash = require("object-hash");
 
 module.exports = (sequelize) => {
     const modelName = "TemplateField";
@@ -83,68 +84,74 @@ module.exports = (sequelize) => {
             return !(usage > 0);
         },
         async getOptions() {
-            return this.options;
+            const fieldOptions = await models["TemplateFieldOption"].findAll(
+                {
+                    where: { templateFieldId: this.id },
+                    order: [["position", "ASC"]],
+                },
+            );
+
+            return fieldOptions.map(fieldOption => {
+                return {
+                    ...fieldOption.toJSON(),
+                    allowChanges: !(fieldOption.usage > 0),
+                };
+            });
         },
         async getOption(optionValue) {
-            const options = await this.getOptions();
-            return options.find(option => option.value === optionValue);
+            return await models["TemplateFieldOption"].findOne({
+                where: {
+                    value: optionValue,
+                    templateFieldId: this.id,
+                },
+            });
         },
-        async setOptions(options) {
-            for (const option of options) {
-                fieldOptionCheckDefaults(option);
-            }
-            this.options = options;
-            await this.save();
+        async createOption(option) {
+            fieldOptionCheckDefaults(option);
+            const lastOptionPosition = await models["TemplateFieldOption"].max("position", { where: { templateFieldId: this.id } });
+            const optionAttributes = {
+                ...option,
+                templateFieldId: this.id,
+                position: lastOptionPosition + 1,
+                value: hash.MD5([option.value, new Date().getTime()]),
+            };
+            await models["TemplateFieldOption"].create(optionAttributes);
             return await this.getOptions();
         },
-        async addOption(option) {
-            fieldOptionCheckDefaults(option);
-            const options = await this.getOptions();
-            option.position = (options).length + 1;
-            options.push(option);
-            return await this.setOptions(options);
-        },
-        async updateOption(optionValue, option) {
-            const options = await this.getOptions();
-            const _option = options.find((_option) => _option.value === optionValue);
-            if (_option) {
-                Object.assign(_option, option, { updatedAt: new Date() });
-                return await this.setOptions(options);
+        async updateOption(optionValue, optionAttributes) {
+            const option = await this.getOption(optionValue);
+            if (option) {
+                option.set(optionAttributes);
+                await option.save();
             }
-            return false;
+
+            return await this.getOptions();
         },
-        async removeOption(optionValue) {
-            if (!(await this.allowOptionChanges(optionValue))) {
+        async deleteOption(optionValue) {
+            const changeAllowed = await this.allowOptionChanges(optionValue);
+            if (!changeAllowed) {
                 return false;
             }
 
-            const options = await this.getOptions();
-            const _option = options.find((_option) => _option.value === optionValue);
-            if (_option) {
-                const position = _option.position;
-                options.splice(options.indexOf(_option), 1);
-                options.filter((_option) => _option.position > position).forEach((_option) => _option.position--);
-                return await this.setOptions(options);
+            const option = await this.getOption(optionValue);
+            if (option) {
+                const position = option.position;
+                await option.destroy();
+
+                const options = await models["TemplateFieldOption"].findAll({
+                    where: {
+                        templateFieldId: this.id,
+                        position: { [Op.gt]: position },
+                    },
+                });
+
+                for (const _option of options) {
+                    _option.position -= 1;
+                    await _option.save();
+                }
             }
-            return false;
-        },
-        async incrementOptionUsage(optionValue) {
-            const options = await this.getOptions();
-            const _option = options.find((_option) => _option.value === optionValue);
-            if (_option) {
-                _option.usage++;
-                return await this.setOptions(options);
-            }
-            return false;
-        },
-        async decrementOptionUsage(optionValue) {
-            const options = await this.getOptions();
-            const _option = options.find((_option) => _option.value === optionValue);
-            if (_option) {
-                _option.usage--;
-                return await this.setOptions(options);
-            }
-            return false;
+
+            return await this.getOptions();
         },
     };
 

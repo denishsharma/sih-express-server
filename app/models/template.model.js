@@ -72,20 +72,29 @@ module.exports = (sequelize) => {
             });
         },
         async createField(fieldAttributes) {
+            const lastFieldPosition = await models["TemplateField"].max("position", {
+                where: { templateId: this.id },
+            });
+
             await models["TemplateField"].create(Object.assign({
                 templateId: this.id,
-                position: (await models["TemplateField"].count({ where: { templateId: this.id } })) + 1,
+                position: lastFieldPosition + 1,
             }, fieldAttributes));
 
             return await this.getFields();
         },
         async updateField(fieldSignature, fieldAttributes) {
+            if (this.usage > 0) {
+                return false;
+            }
+
             const field = await models["TemplateField"].findOne({
                 where: {
                     templateId: this.id,
                     signature: fieldSignature,
                 },
             });
+
 
             if (field) {
                 field.set(fieldAttributes);
@@ -106,6 +115,13 @@ module.exports = (sequelize) => {
                 },
             });
 
+            const fieldOptionsId = (await models["TemplateFieldOption"].findAll(
+                {
+                    where: { templateFieldId: field.id },
+                    attributes: ["id"],
+                },
+            )).map(({ id }) => id);
+
             if (field) {
                 const position = field.position;
                 await field.destroy();
@@ -121,9 +137,27 @@ module.exports = (sequelize) => {
                     field.position -= 1;
                     await field.save();
                 }
+
+                if (fieldOptionsId) {
+                    await models["TemplateFieldOption"].destroy({
+                        where: {
+                            id: { [Op.in]: fieldOptionsId },
+                        },
+                    });
+                }
             }
 
             return await this.getFields();
+        },
+        async updateFieldOptions(fieldSignature, fieldOptions) {
+            const optionsToCreate = fieldOptions.create;
+            const optionsToUpdate = fieldOptions.update;
+            const optionsToDelete = fieldOptions.delete;
+
+            const field = await models["TemplateField"].findOne({ where: { signature: fieldSignature } });
+            if (field) {
+
+            }
         },
         async getVersions() {
             return await models["Template"].findAll({
@@ -151,6 +185,16 @@ module.exports = (sequelize) => {
                 versionOf: this.id,
                 version: version + 1,
             }, versionAttributes));
+        },
+        async increaseUsage() {
+            this.usage += 1;
+            await this.save();
+            return this.usage;
+        },
+        async decreaseUsage() {
+            this.usage -= 1;
+            await this.save();
+            return this.usage;
         },
     };
 

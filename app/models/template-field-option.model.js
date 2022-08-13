@@ -56,7 +56,25 @@ module.exports = (sequelize) => {
         },
     };
 
-    const instanceMethods = {};
+    const instanceMethods = {
+        async getTemplateField() {
+            return await models["TemplateField"].findOne({
+                where: {
+                    id: this.templateFieldId,
+                },
+            });
+        },
+        async increaseUsage() {
+            this.usage++;
+            await this.save();
+            return true;
+        },
+        async decreaseUsage() {
+            this.usage--;
+            await this.save();
+            return true;
+        },
+    };
 
     const classMethods = {};
 
@@ -70,7 +88,7 @@ module.exports = (sequelize) => {
         }
     };
 
-    TemplateFieldOption.assoicate = (_models) => {
+    TemplateFieldOption.associate = (_models) => {
         models = _models;
 
         for (const association in associations) {
