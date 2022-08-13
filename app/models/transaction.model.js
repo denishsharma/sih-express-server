@@ -1,7 +1,8 @@
-const { Model, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
     const modelName = "Transaction";
+    let models = {};
 
     const attributes = {
         id: {
@@ -16,7 +17,29 @@ module.exports = (sequelize) => {
 
     const Transaction = sequelize.define(modelName, attributes, options);
 
-    Transaction.associate = (models) => {};
+    const associations = {};
+
+    const instanceMethods = {};
+
+    const classMethods = {};
+
+    Transaction.registerMethods = () => {
+        for (const method in instanceMethods) {
+            Transaction.prototype[method] = instanceMethods[method];
+        }
+
+        for (const method in classMethods) {
+            Transaction[method] = classMethods[method];
+        }
+    };
+
+    Transaction.associate = (_models) => {
+        models = _models;
+
+        for (const association in associations) {
+            associations[association]();
+        }
+    };
 
     return Transaction;
 };
