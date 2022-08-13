@@ -135,10 +135,19 @@ const testAddNewFieldToTemplate = async () => {
     const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
     const templateFields = await template.createField({
         templateId: template.id,
-        signature: "field5_sig",
-        name: "field5",
-        dataType: "string",
+        name: "field6",
+        dataType: "option",
         isRequired: true,
+        options: [
+            {
+                name: "option1",
+                value: "option1",
+            },
+            {
+                name: "option2",
+                value: "option2",
+            },
+        ],
     });
     console.log(parseToJSONObject(templateFields));
 };
@@ -208,7 +217,7 @@ exports.test = async () => {
     // await testGetTemplateFieldsWithOptions(); //OK!
     // await testGetTemplateVersions(); //OK!
 
-    // await testAddNewFieldToTemplate(); //OK!
+    await testAddNewFieldToTemplate(); //OK!
     // await testDeleteFieldFromTemplate(); //OK!
     // await testDeleteTemplateWithUsage(); //OK!
     // await testUpdateFieldOfTemplate(); //OK!

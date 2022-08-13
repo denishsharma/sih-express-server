@@ -1,5 +1,6 @@
 const { DataTypes, Op } = require("sequelize");
 const { parseToJSONObject } = require("../utils/general.utils");
+const hash = require("object-hash");
 
 module.exports = (sequelize) => {
     const modelName = "Template";
@@ -55,12 +56,30 @@ module.exports = (sequelize) => {
     };
 
     const instanceMethods = {
+        async hasVersions() {
+            return await Template.count({
+                where: {
+                    versionOf: this.id,
+                },
+            }) > 0;
+        },
+        async deleteVersions() {
+            await Template.destroy({
+                where: {
+                    versionOf: this.id,
+                },
+            });
+        },
         async getFields() {
             return await models["TemplateField"].findAll({
                 where: {
                     templateId: this.id,
                 },
-                order: [["position", "ASC"]],
+                include: [{ model: models["TemplateFieldOption"], as: "options" }],
+                order: [
+                    ["position", "ASC"],
+                    ["options", "position", "ASC"],
+                ],
             });
         },
         async getField(fieldSignature) {
@@ -71,15 +90,51 @@ module.exports = (sequelize) => {
                 },
             });
         },
+        async getLatestFieldPosition() {
+            const field = await models["TemplateField"].findOne({
+                where: {
+                    templateId: this.id,
+                },
+                order: [["position", "DESC"]],
+            });
+            return field ? field.position : 0;
+        },
         async createField(fieldAttributes) {
             const lastFieldPosition = await models["TemplateField"].max("position", {
                 where: { templateId: this.id },
             });
 
-            await models["TemplateField"].create(Object.assign({
-                templateId: this.id,
-                position: lastFieldPosition + 1,
-            }, fieldAttributes));
+            if (!fieldAttributes.options) {
+                fieldAttributes.options = [];
+            }
+
+            let optionPosition = 0;
+            fieldAttributes.options = fieldAttributes.options.map(option => {
+                return {
+                    ...option,
+                    position: optionPosition++,
+                    value: hash.MD5([option.value, new Date().getTime()]),
+                    usage: 0,
+                };
+            });
+
+            if (!fieldAttributes.signature) {
+                fieldAttributes.signature = hash.MD5([fieldAttributes, new Date().getTime()]);
+            }
+
+            if (!fieldAttributes.position) {
+                fieldAttributes.position = lastFieldPosition + 1;
+            }
+
+            await models["TemplateField"].create(
+                {
+                    ...fieldAttributes,
+                    templateId: this.id,
+                },
+                {
+                    include: [{ model: models["TemplateFieldOption"], as: "options" }],
+                },
+            );
 
             return await this.getFields();
         },
