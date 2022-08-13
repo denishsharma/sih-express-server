@@ -39,7 +39,8 @@ const testCreateRecord = async () => {
     const fieldValues = sortedFields.map(({ value }) => value);
 
     const recordRaw = {
-        ...createRequest,
+        templateId: createRequest.templateId,
+        fields: sortedFields,
         // fieldSignatures,
         // fieldValues,
     };
