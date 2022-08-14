@@ -63,13 +63,21 @@ const testCreateRecord = async () => {
     console.log(metadata, fieldValues, fieldSignatures);
 };
 
+const testDeleteRecord = async () => {
+    const count = await Record.destroy({ where: { templateId: "7d85a1dd-7199-425c-8499-3458f810933e" } });
+    console.log(`deleted row(s): ${count}`);
+}
+
+const testUpdateRecord = async () => {
+    
+}
 const someTest = async () => {
     console.log("someTest");
 };
 
 exports.test = async () => {
-    await testCreateRecord();
-
+    // await testCreateRecord();
+    // await testDeleteRecord(); 
     process.exit();
 };
 
