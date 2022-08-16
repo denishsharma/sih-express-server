@@ -10,7 +10,8 @@
         "db:seed": "node ./app/seeders/index.js seed-all",
         "contract:migrate:all": "truffle compile && node ./app/contract.js deploy-diff && node ./app/contract.js load-deployed",
         "test:unit": "node ./test/index.js test-unit-single",
-        "test:app": "node ./test/index.js test-app-single"
+        "test:app": "node ./test/index.js test-app-single",
+        "test:contract": "node ./test/index.js test-contract-single"
     },
     "keywords": [],
     "author": "Denish Sharma",
