@@ -26,14 +26,6 @@ contract Records {
         address _sender
     );
 
-    event ev_test(string _test);
-    event ev_test1(string _test2);
-
-    function _test(string memory _someString) public {
-        emit ev_test(_someString);
-        emit ev_test1(_someString);
-    }
-
     function createRecord(string memory _recordId, string[] memory _metadata, string[] memory _values, string[] memory _fields) public returns (bool) {
         RecordItem memory _recordItem;
         _recordItem.recordId = _recordId;
