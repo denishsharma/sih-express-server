@@ -2,10 +2,10 @@ const { Records } = require("../../app/contracts");
 const { web3 } = require("../../app/utils/web3.utils");
 const { createMetaTransaction, sendMetaTransaction } = require("../../app/utils/wallet.utils");
 
-const publicKey = '0xaE296118b0E9fd123a024AB8a44c623b9f891781';
-const privateKey = '193af6a5644a0e55d9024dc65c7a1e3e59a06b3d3ecfae9e232c51f395c508db';
+const publicKey = "0xaE296118b0E9fd123a024AB8a44c623b9f891781";
+const privateKey = "193af6a5644a0e55d9024dc65c7a1e3e59a06b3d3ecfae9e232c51f395c508db";
 
-const processEventLogs = async(logs) => {
+const processEventLogs = async (logs) => {
     const jsonInterfaces = Records._jsonInterface.filter((item) => item.type === "event");
 
     const events = [];
@@ -27,23 +27,22 @@ const processEventLogs = async(logs) => {
 };
 
 
-const sendTx = async(methodName, ...params) => {
+const sendTx = async (methodName, ...params) => {
     const signedTransaction = await createMetaTransaction(Records, publicKey, privateKey, {}, methodName, ...params);
     const txReceipt = await sendMetaTransaction(signedTransaction);
 
     return await processEventLogs(txReceipt.logs);
 };
 
-
-const testCreateRecord = async() => {
+const testCreateRecord = async () => {
     const input = {
         signature: "IDRNRecord2",
-        metadata: ['templateId', 'templateVersion', 'something'],
-        values: ['value1', 'value2', 'value3'],
-        fields: ['field1', 'field2', 'field3'],
+        metadata: ["templateId", "templateVersion", "something"],
+        values: ["value1", "value2", "value3"],
+        fields: ["field1", "field2", "field3"],
     };
 
-    const logs = await sendTx('createRecord', input.signature, input.metadata, input.values, input.fields);
+    const logs = await sendTx("createRecord", input.signature, input.metadata, input.values, input.fields);
 
     logs.filter((log) => log.name === "LogRecord").map((log) => {
         console.log(log.data);
@@ -51,39 +50,38 @@ const testCreateRecord = async() => {
 };
 
 
-
-const testUpdateRecord = async() => {
+const testUpdateRecord = async () => {
     const input = {
         signature: "IDRNRecord1",
-        values: ['New value1', 'New value3'],
-        fields: ['field1', 'field3'],
-    }
+        values: ["New value1", "New value3"],
+        fields: ["field1", "field3"],
+    };
 
-    const logs = await sendTx('updateRecord', input.signature, input.values, input.fields);
+    const logs = await sendTx("updateRecord", input.signature, input.values, input.fields);
 
     logs.filter((log) => log.name === "LogRecord").map((log) => {
         console.log(log.data);
     });
 };
 
-const testReadRecord = async() => {
+const testReadRecord = async () => {
     const input = {
-        signature: "IDRNRecord1"
-    }
+        signature: "IDRNRecord1",
+    };
 
-    const logs = await sendTx('readRecord', input.signature);
+    const logs = await sendTx("readRecord", input.signature);
 
     logs.filter((log) => log.name === "LogRecord").map((log) => {
         console.log(log.data);
     });
 };
 
-const testdeleteRecord = async() => {
+const testdeleteRecord = async () => {
     const input = {
-        signature: "IDRNRecord1"
-    }
+        signature: "IDRNRecord1",
+    };
 
-    const logs = await sendTx('deleteRecord', input.signature);
+    const logs = await sendTx("deleteRecord", input.signature);
 
     logs.filter((log) => log.name === "LogRecord").map((log) => {
         console.log(log.data);
@@ -91,7 +89,7 @@ const testdeleteRecord = async() => {
 };
 
 
-exports.test = async() => {
+exports.test = async () => {
     // await testCreateRecord();
     // await testReadRecord();
     // await testUpdateRecord();

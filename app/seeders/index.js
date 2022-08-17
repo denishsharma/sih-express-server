@@ -4,6 +4,7 @@ const path = require("path");
 
 const args = process.argv.slice(2);
 const seedAll = (args[0].toLowerCase() === "seed-all") || false;
+const seedOne = (args[0].toLowerCase() === "seed-one") || false;
 
 const seeders = {};
 
@@ -25,5 +26,16 @@ if (seedAll) {
             console.log(`${seederName} seeder OK!`);
         }
         console.log("Seeding database OK!");
+    })();
+}
+
+if (seedOne) {
+    (async () => {
+        const seeder = seeders[args[1]];
+        if (seeder) {
+            console.log(`Seeding ${args[1]} seeder...`);
+            await seeder.seed();
+            console.log(`Seeding ${args[1]} seeder OK!`);
+        }
     })();
 }
