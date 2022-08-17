@@ -6,7 +6,7 @@ const contractTests = {};
 const generalTemplate = require("./app/generalTemplate.test");
 
 // Import Contract Tests
-const organizations = require("./contracts/Organizations.test");
+const organizations = require("./contract/Organizations.test");
 
 // Import Unit Tests
 const web3MetaTransactionCall = require("./unit/web3MetaTransactionCall.test");
