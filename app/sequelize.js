@@ -28,14 +28,15 @@ fs.readdirSync(paths.models).forEach((file) => {
     seq[model.name] = model;
 });
 
+console.log("Associating and registering methods for models...");
 Object.keys(seq).forEach((modelName) => {
     if (seq[modelName].associate) {
-        console.log(`Associating ${modelName}...`);
+        // console.log(`Associating ${modelName}...`);
         seq[modelName].associate(seq);
     }
 
     if (seq[modelName].registerMethods) {
-        console.log(`Registering methods for ${modelName}...`);
+        // console.log(`Registering methods for ${modelName}...`);
         seq[modelName].registerMethods();
     }
 });

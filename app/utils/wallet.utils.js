@@ -11,7 +11,6 @@ exports.sendSignedTransaction = async (signedTransaction) => {
     return await web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
 };
 
-
 exports.createMetaTransaction = async (contract, delegatePublicAddress, delegatePrivateKey, options, methodName, ...params) => {
     const target = contract.options.address;
     const nonce = await contract.methods["nonces"](delegatePublicAddress).call();
@@ -52,4 +51,22 @@ exports.transferEther = async (fromAddress, toAddress, amountInWei, fromPrivateK
 
     const signedTransaction = await this.createTransaction(transactionObject, fromPrivateKey);
     return await this.sendSignedTransaction(signedTransaction);
+};
+
+exports.processEventLogs = async (contract, logs) => {
+    const jsonInterfaces = contract._jsonInterface.filter((item) => item.type === "event");
+    const events = [];
+    for (const log of logs) {
+        for (const topic of log.topics) {
+            for (const jsonInterface of jsonInterfaces) {
+                if (topic === jsonInterface.signature) {
+                    events.push({
+                        name: jsonInterface.name,
+                        data: web3.eth.abi.decodeLog(jsonInterface.inputs, log.data, log.topics),
+                    });
+                }
+            }
+        }
+    }
+    return events;
 };

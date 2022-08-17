@@ -4,6 +4,10 @@ const contractTests = {};
 
 // Import App Tests
 const generalTemplate = require("./app/generalTemplate.test");
+const templateRecord = require("./app/templateRecord.test");
+
+// Import Contract Tests
+const recordsContract = require("./contract/records.test");
 
 // Import Contract Tests
 const organizations = require("./contract/Organizations.test");
@@ -25,6 +29,8 @@ const addToTest = (test, list) => {
 
 // Add to Tests
 addToTest(generalTemplate, appTests);
+addToTest(templateRecord, appTests);
+addToTest(recordsContract, contractTests);
 addToTest(organizations, contractTests);
 addToTest(web3MetaTransactionCall, unitTests);
 

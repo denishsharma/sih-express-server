@@ -21,6 +21,7 @@ const simpleStorageRoutes = require("./routes/simple-storage.route");
 const volunteerProfileRoutes = require("./routes/volunteer-profile.route");
 const idrnRoutes = require("./routes/idrn.route");
 const templateRoutes = require("./routes/template.route");
+const recordRoutes = require("./routes/record.route");
 const organizationRoutes = require("./routes/organization.route");
 
 // API Routes Declare
@@ -30,6 +31,7 @@ app.use("/simpleStorage", validateServerToken, simpleStorageRoutes);
 app.use("/volunteerProfile", validateServerToken, volunteerProfileRoutes);
 app.use("/idrn", validateServerToken, idrnRoutes);
 app.use("/template", validateServerToken, templateRoutes);
+app.use("/record", validateServerToken, recordRoutes);
 app.use("/organization", validateServerToken, organizationRoutes);
 
 // Test Routes

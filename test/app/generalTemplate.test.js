@@ -212,7 +212,6 @@ const testDeleteOptionInField = async () => {
     console.log(parseToJSONObject(options));
 };
 
-
 exports.test = async () => {
     // await testCreateTemplateWithFieldsAndVersions(); //OK!
     // await testGetTemplateFieldsWithOptions(); //OK!
