@@ -13,17 +13,6 @@ const { parseToJSONObject } = require("../../app/utils/general.utils");
  * If template is in use then you cannot edit the fields of that template, but you can edit the unused options of the fields.
  */
 
-const updateTemplateUsage = async (templateId, usage) => {
-    const template = await Template.findOne({ where: { id: templateId } });
-    template.usage = usage;
-    await template.save();
-};
-const increaseTemplateUsage = async (templateId) => {
-    const template = await Template.findOne({ where: { id: templateId } });
-    template.usage++;
-    await template.save();
-};
-
 // Test for creating a template with fields and versions... OK!
 const testCreateTemplateWithFieldsAndVersions = async () => {
     const template = await Template.create(
@@ -106,9 +95,138 @@ const testCreateTemplateWithFieldsAndVersions = async () => {
     console.log(parseToJSONObject(template));
 };
 
+// Test for getting fields with options of a template... OK!
+const testGetTemplateFieldsWithOptions = async () => {
+    const templateFields = await TemplateField.findAll(
+        {
+            where: { templateId: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" },
+            include: [{ model: TemplateFieldOption, as: "options" }],
+            order: [
+                ["position", "ASC"],
+                ["options", "position", "ASC"],
+            ],
+        },
+    );
+    console.log(parseToJSONObject(templateFields));
+};
+
+// Test for getting template versions of a template... OK!
+const testGetTemplateVersions = async () => {
+    const templateVersions = await Template.findAll({
+        where: { versionOf: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" },
+        include: [
+            {
+                model: TemplateField,
+                as: "fields",
+                include: [{ model: TemplateFieldOption, as: "options" }],
+            },
+        ],
+        order: [
+            ["version", "DESC"],
+            ["fields", "position", "ASC"],
+            ["fields", "options", "position", "ASC"],
+        ],
+    });
+    console.log(parseToJSONObject(templateVersions)[0]);
+};
+
+// Test for adding a new field to a template... OK!
+const testAddNewFieldToTemplate = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    const templateFields = await template.createField({
+        templateId: template.id,
+        name: "field6",
+        dataType: "option",
+        isRequired: true,
+        options: [
+            {
+                name: "option1",
+                value: "option1",
+            },
+            {
+                name: "option2",
+                value: "option2",
+            },
+        ],
+    });
+    console.log(parseToJSONObject(templateFields));
+};
+
+// Test for deleting a field from a template... OK!
+const testDeleteFieldFromTemplate = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    const templateFields = await template.deleteField("field5_sig");
+
+    console.log(parseToJSONObject(templateFields));
+};
+
+// Test for deleting a field from a template which is in use (it should not delete)... OK!
+const testDeleteTemplateWithUsage = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    await template.increaseUsage();
+
+    const canDelete = await template.deleteField("field5_sig");
+
+    if (!canDelete) {
+        console.log("Test pass");
+    }
+
+    await template.decreaseUsage();
+};
+
+// Test for updating a field without options of a template... OK!
+const testUpdateFieldOfTemplate = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    const templateFields = await template.updateField("field5_sig", {
+        name: "field5",
+        dataType: "option",
+        isRequired: true,
+    });
+    console.log(parseToJSONObject(templateFields));
+};
+
+// Test for getting options of a field... OK!
+const testGetOptionsOfField = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    const templateField = await template.getField("field2_sig");
+    const options = await templateField.getOptions();
+    console.log(options);
+};
+
+// Test for creating new option in field... OK!
+const testCreateOptionInField = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    const templateField = await template.getField("field2_sig");
+    const options = await templateField.createOption({
+        name: "option4",
+        value: "option4",
+    });
+    console.log(parseToJSONObject(options));
+};
+
+// Test for deleting option in field... OK!
+const testDeleteOptionInField = async () => {
+    const template = await Template.findOne({ where: { id: "1d68fa8a-23ef-4bd4-b163-a89ac6df9dfc" } });
+    const templateField = await template.getField("field2_sig");
+    const options = await templateField.deleteOption("option2");
+    console.log(parseToJSONObject(options));
+};
+
+
 exports.test = async () => {
     // await testCreateTemplateWithFieldsAndVersions(); //OK!
-    
+    // await testGetTemplateFieldsWithOptions(); //OK!
+    // await testGetTemplateVersions(); //OK!
+
+    await testAddNewFieldToTemplate(); //OK!
+    // await testDeleteFieldFromTemplate(); //OK!
+    // await testDeleteTemplateWithUsage(); //OK!
+    // await testUpdateFieldOfTemplate(); //OK!
+
+    // await testGetOptionsOfField(); //OK!
+    // await testCreateOptionInField(); //OK!
+    // await testDeleteOptionInField(); //OK!
+
     process.exit();
 };
 
