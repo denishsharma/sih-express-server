@@ -9,6 +9,9 @@ const templateRecord = require("./app/templateRecord.test");
 // Import Contract Tests
 const recordsContract = require("./contract/records.test");
 
+// Import Contract Tests
+const organizations = require("./contract/Organizations.test");
+
 // Import Unit Tests
 const web3MetaTransactionCall = require("./unit/web3MetaTransactionCall.test");
 
@@ -28,6 +31,7 @@ const addToTest = (test, list) => {
 addToTest(generalTemplate, appTests);
 addToTest(templateRecord, appTests);
 addToTest(recordsContract, contractTests);
+addToTest(organizations, contractTests);
 addToTest(web3MetaTransactionCall, unitTests);
 
 const testUnitSingle = async (testName) => {
@@ -36,7 +40,7 @@ const testUnitSingle = async (testName) => {
 
 const testContractSingle = async (testName) => {
     await contractTests[testName]();
-}
+};
 
 const testAppSingle = async (testName) => {
     await appTests[testName]();

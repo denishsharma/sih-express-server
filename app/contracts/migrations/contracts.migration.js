@@ -6,4 +6,5 @@ exports.migrateContracts = [
     "MultiplyNumbers",
     "VolunteerProfile",
     "Records",
+    "Organizations",
 ];

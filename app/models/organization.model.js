@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-    const modelName = "User";
+    const modelName = "Organization";
     let models = {};
 
     const attributes = {
@@ -11,63 +11,58 @@ module.exports = (sequelize) => {
             primaryKey: true,
             unique: true,
         },
-        userKey: {
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        signature: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
         },
-        address: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-        },
-        secret: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        organizationId: DataTypes.UUID,
+
     };
 
     const options = {};
 
-    const User = sequelize.define(modelName, attributes, options);
+    const Organization = sequelize.define(modelName, attributes, options);
 
     const associations = {
-        belongsToOrganization: () => {
-            User.belongsTo(models["Organization"], {
+        hasManyUsers: () => {
+            Organization.hasMany(models["User"], {
                 foreignKey: "organizationId",
-                as: "organization",
+                as: "users",
             });
-        },
+        }
     };
 
     const instanceMethods = {
-        async getOrganization() {
-            return await models["Organization"].findOne({
-                where: {
-                    id: this.organizationId,
-                },
-            });
-        },
-        async setOrganization(organizationId) {
-            this.organizationId = organizationId;
-            return await this.save();
-        },
+        // async getUsers() {
+        //     return await models["User"].findAll({
+        //         where: {
+        //             organizationId: this.id,
+        //         },
+        //     });
+        // },
     };
 
     const classMethods = {};
 
-    User.registerMethods = () => {
+    Organization.registerMethods = () => {
         for (const method in instanceMethods) {
-            User.prototype[method] = instanceMethods[method];
+            Organization.prototype[method] = instanceMethods[method];
         }
 
         for (const method in classMethods) {
-            User[method] = classMethods[method];
+            Organization[method] = classMethods[method];
         }
     };
 
-    User.associate = (_models) => {
+    Organization.associate = (_models) => {
         models = _models;
 
         for (const association in associations) {
@@ -75,5 +70,5 @@ module.exports = (sequelize) => {
         }
     };
 
-    return User;
+    return Organization;
 };
