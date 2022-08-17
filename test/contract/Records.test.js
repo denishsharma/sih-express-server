@@ -76,7 +76,7 @@ const testReadRecord = async () => {
     });
 };
 
-const testdeleteRecord = async () => {
+const testDeleteRecord = async () => {
     const input = {
         signature: "IDRNRecord1",
     };
@@ -93,7 +93,7 @@ exports.test = async () => {
     // await testCreateRecord();
     // await testReadRecord();
     // await testUpdateRecord();
-    // await testdeleteRecord();
+    // await testDeleteRecord();
     // await testReadRecord();
 };
 
