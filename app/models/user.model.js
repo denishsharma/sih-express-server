@@ -39,6 +39,12 @@ module.exports = (sequelize) => {
                 as: "organization",
             });
         },
+        belongsToManyTask: () => {
+            User.belongsToMany(models["Task"], {
+                through: "UserTask",
+                as: "tasks",
+            });
+        },
     };
 
     const instanceMethods = {

@@ -11,6 +11,18 @@ exports.sendSignedTransaction = async (signedTransaction) => {
     return await web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
 };
 
+exports.sendMethodTransaction = async (contract, publicKey, privateKey, options, methodName, ...params) => {
+    const data = contract.methods[methodName](...params).encodeABI();
+    const transactionObject = Object.assign({
+        from: publicKey,
+        to: contract.options.address,
+        data,
+        gas: options.gas || Web3Config.transaction.gas.high,
+    }, options);
+    const signedTransaction = await this.createTransaction(transactionObject, privateKey);
+    return await this.sendSignedTransaction(signedTransaction);
+};
+
 exports.createMetaTransaction = async (contract, delegatePublicAddress, delegatePrivateKey, options, methodName, ...params) => {
     const target = contract.options.address;
     const nonce = await contract.methods["nonces"](delegatePublicAddress).call();
@@ -29,6 +41,11 @@ exports.createMetaTransaction = async (contract, delegatePublicAddress, delegate
 exports.sendMetaTransaction = async (metaTransaction) => {
     const signedTransaction = await this.createTransaction(Object.assign({ from: Web3Config.metaAccounts.env.publicAddress }, metaTransaction), Web3Config.metaAccounts.env.privateKey);
     return await this.sendSignedTransaction(signedTransaction);
+};
+
+exports.sendSignedMetaTransaction = async (contract, delegatePublicAddress, delegatePrivateKey, options, methodName, ...params) => {
+    const metaTransaction = await this.createMetaTransaction(contract, delegatePublicAddress, delegatePrivateKey, options, methodName, ...params);
+    return await this.sendMetaTransaction(metaTransaction);
 };
 
 exports.createLockedAccount = async (userKey) => {

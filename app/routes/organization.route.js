@@ -1,11 +1,10 @@
 const router = require("express").Router();
 const organizationController = require("../controllers/organization.controller");
 
-router.get("/", organizationController.index);
-
 router.post("/create", organizationController.create);
-router.get("/readAll", organizationController.readAll);
-router.get("/:signature/read", organizationController.read);
+router.get("/all", organizationController.readAll);
+
+router.get("/:signature", organizationController.read);
 router.post("/:signature/update", organizationController.update);
 router.post("/:signature/delete", organizationController.delete);
 

@@ -1,45 +1,13 @@
 const { isRequestEmpty } = require("../utils/requests.utils");
-const { web3 } = require("../utils/web3.utils");
 const { parseToJSONObject } = require("../utils/general.utils");
 const Web3Config = require("../configs/web3.config");
 const { Organization, User, Sequelize } = require("../sequelize");
 const hash = require("object-hash");
 const { Organizations } = require("../contracts");
-const { createTransaction, sendSignedTransaction } = require("../utils/wallet.utils");
+const { processEventLogs, sendSignedMetaTransaction } = require("../utils/wallet.utils");
+const { decodeToken } = require("../utils/jwt.utils");
+const { unlockUserAddress } = require("../utils/secure.utils");
 const Op = Sequelize.Op;
-
-const processEventLogs = async (logs) => {
-    const jsonInterfaces = Organizations._jsonInterface.filter((item) => item.type === "event");
-
-    const events = [];
-
-    for (const log of logs) {
-        for (const topic of log.topics) {
-            for (const jsonInterface of jsonInterfaces) {
-                if (topic === jsonInterface.signature) {
-                    events.push({
-                        name: jsonInterface.name,
-                        data: web3.eth.abi.decodeLog(jsonInterface.inputs, log.data, log.topics),
-                    });
-                }
-            }
-        }
-    }
-
-    return events;
-};
-
-const sendTx = async (tx, privateKey) => {
-    const signedTransaction = await createTransaction(tx, privateKey);
-    const txReceipt = await sendSignedTransaction(signedTransaction);
-
-    return await processEventLogs(txReceipt.logs);
-};
-
-
-exports.index = (req, res) => {
-    res.send("Organization Records");
-};
 
 exports.create = async (req, res) => {
     if (isRequestEmpty(req)) {
@@ -47,23 +15,18 @@ exports.create = async (req, res) => {
         return;
     }
 
-    const { name, description } = req.body;
+    const { name, description, userToken } = req.body;
 
-    if (await Organization.findOne({ where: { name } })) {
-        res.status(400).json({
-            message: `Organization with the name ${name} is already exists.`,
-        });
-        return;
-    }
+    const decoded = decodeToken(userToken);
+    const unlockedUser = unlockUserAddress(decoded);
+
     const signature = hash.MD5([{ name, description }, new Date().getTime()]);
 
-    const tx = {
-        to: Organizations.options.address,
+    const txReceipt = await sendSignedMetaTransaction(Organizations, unlockedUser.address, unlockedUser.secret, {
         gas: Web3Config.transaction.gas.high,
-        data: Organizations.methods["addOrganization"](signature).encodeABI(),
-    };
+    }, "addOrganization", signature);
 
-    const logs = await sendTx(tx);
+    const logs = await processEventLogs(Organizations, txReceipt.logs);
 
     const _signature = logs.filter((log) => log.name === "OrganizationCreated").map((log) => log.data["_organization"])[0];
 
@@ -72,20 +35,19 @@ exports.create = async (req, res) => {
         return;
     }
 
-    const organizationAttributes = {
-        name,
-        description,
-        signature,
-    };
-
     try {
-        const organization = await Organization.create(organizationAttributes);
+        const organization = await Organization.create({
+            name,
+            description,
+            signature,
+        });
 
         res.json({
             data: {
                 name: organization.name,
                 description: organization.description,
                 signature: organization.signature,
+                users: [],
             },
             message: "Organization created successfully.",
         });
@@ -102,14 +64,16 @@ exports.create = async (req, res) => {
 };
 
 exports.readAll = async (req, res) => {
-    const organizations = await Organization.findAll();
+    const organizations = await Organization.findAll({
+        include: [{ model: User, as: "users" }],
+    });
+
     res.json({
         data: {
             organizations: parseToJSONObject(organizations),
         },
         message: "Organizations read successfully.",
     });
-
 };
 
 exports.read = async (req, res) => {
@@ -125,21 +89,15 @@ exports.read = async (req, res) => {
         return;
     }
 
-    console.log("Organization: ", organization.toJSON());
-
     res.json({
         data: {
             organization: parseToJSONObject(organization),
         },
         message: "Organization found successfully.",
     });
-
-
 };
 
-
 exports.update = async (req, res) => {
-
     if (isRequestEmpty(req)) {
         res.status(400).json({ message: "Empty request body" });
         return;
@@ -167,8 +125,13 @@ exports.update = async (req, res) => {
     });
 
 };
+
 exports.delete = async (req, res) => {
     const { signature } = req.params;
+    const { userToken } = req.body;
+
+    const decoded = decodeToken(userToken);
+    const unlockedUser = unlockUserAddress(decoded);
 
     const organization = await Organization.findOne({
         where: { signature },
@@ -176,6 +139,18 @@ exports.delete = async (req, res) => {
 
     if (!organization) {
         res.status(404).json({ message: `Organization with ${signature} not found.` });
+        return;
+    }
+
+    const txReceipt = await sendSignedMetaTransaction(Organizations, unlockedUser.address, unlockedUser.secret, {
+        gas: Web3Config.transaction.gas.high,
+    }, "deleteOrganization", signature);
+    const logs = await processEventLogs(Organizations, txReceipt.logs);
+
+    const _success = logs.filter((log) => log.name === "OrganizationDeleted").map((log) => log.data["_success"])[0];
+
+    if (!_success) {
+        res.status(400).json({ message: "Organization deletion failed." });
         return;
     }
 
@@ -190,7 +165,6 @@ exports.delete = async (req, res) => {
         return;
     }
 
-
     await organization.destroy();
 
     res.json({
@@ -200,7 +174,10 @@ exports.delete = async (req, res) => {
 
 exports.addUsers = async (req, res) => {
     const { signature } = req.params;
-    const { users } = req.body;
+    const { users, userToken } = req.body;
+
+    const decoded = decodeToken(userToken);
+    const unlockedUser = unlockUserAddress(decoded);
 
     const _users = await User.findAll({
         where: {
@@ -208,16 +185,19 @@ exports.addUsers = async (req, res) => {
         },
     });
 
+    const addresses = _users.map((user) => user.address);
+
     const organization = await Organization.findOne({
         where: { signature },
     });
 
-    const addresses = _users.map(user => user.address);
-
-
     for (const user of _users) {
         await user.setOrganization(organization.id);
     }
+
+    await sendSignedMetaTransaction(Organizations, unlockedUser.address, unlockedUser.secret, {
+        gas: Web3Config.transaction.gas.high,
+    }, "addUsersToOrganization", organization.signature, addresses);
 
     res.json({
         message: "Users added successfully.",
@@ -226,21 +206,33 @@ exports.addUsers = async (req, res) => {
 
 exports.removeUsers = async (req, res) => {
     const { signature } = req.params;
-    const { users } = req.body;
+    const { users, userToken } = req.body;
 
-    const _users = await User.findAll({
-        where: {
-            userKey: { [Op.in]: users },
-        },
-    });
+    const decoded = decodeToken(userToken);
+    const unlockedUser = unlockUserAddress(decoded);
 
     const organization = await Organization.findOne({
         where: { signature },
     });
 
+    const _users = await User.findAll({
+        where: {
+            [Op.and]: [
+                { userKey: { [Op.in]: users } },
+                { organizationId: organization.id },
+            ],
+        },
+    });
+
+    const addresses = _users.map((user) => user.address);
+
     for (const user of _users) {
         await user.setOrganization(null);
     }
+
+    await sendSignedMetaTransaction(Organizations, unlockedUser.address, unlockedUser.secret, {
+        gas: Web3Config.transaction.gas.high,
+    }, "removeUsersFromOrganization", organization.signature, addresses);
 
     res.json({
         message: "Users removed successfully.",

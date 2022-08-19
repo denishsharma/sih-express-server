@@ -4,7 +4,6 @@ const { Organization, User, Sequelize } = require("../../app/sequelize");
 const { web3 } = require("../../app/utils/web3.utils");
 const { createTransaction, sendSignedTransaction } = require("../../app/utils/wallet.utils");
 const { parseToJSONObject } = require("../../app/utils/general.utils");
-const { address } = require("@truffle/contract/lib/contract/properties");
 const Op = Sequelize.Op;
 
 const publicKey = process.env.META_ACCOUNT_ADDRESS;

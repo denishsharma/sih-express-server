@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-contract Organizations {
+import "./MetaTransaction.sol";
+
+contract Organizations is MetaTransaction {
     struct _logOrganization {
         string signature;
         address[] users;
@@ -10,20 +12,20 @@ contract Organizations {
     string[] public organizations;
     mapping(string => address[]) public organizationUsers;
 
-    event OrganizationCreated(string _organization);
-    event OrganizationDeleted(string _organization, bool _success);
-    event OrganizationUserAdded(string _organization, address _user);
-    event OrganizationUserRemoved(string _organization, address _user);
+    event OrganizationCreated(string _organization, address _sender);
+    event OrganizationDeleted(string _organization, bool _success, address _sender);
+    event OrganizationUserAdded(string _organization, address _user, address _sender);
+    event OrganizationUserRemoved(string _organization, address _user, address _sender);
 
     event Op_OrganizationUsers(string _organization, address[] _users);
     event Op_OrganizationList(string[] _organizations);
     event Op_OrganizationWithUsers(_logOrganization _organization);
 
 
-    function addOrganization(string memory _signature) public {
+    function addOrganization(string memory _signature) public meta {
         if (organizations.length == 0) {
             organizations.push(_signature);
-            emit OrganizationCreated(_signature);
+            emit OrganizationCreated(_signature, mtxSigner);
         } else {
             for (uint i = 0; i < organizations.length; i++) {
                 if (keccak256(abi.encodePacked(organizations[i])) == keccak256(abi.encodePacked(_signature))) {
@@ -31,11 +33,11 @@ contract Organizations {
                 }
             }
             organizations.push(_signature);
-            emit OrganizationCreated(_signature);
+            emit OrganizationCreated(_signature, mtxSigner);
         }
     }
 
-    function addUserToOrganization(string memory _signature, address _user) public {
+    function addUserToOrganization(string memory _signature, address _user) public meta {
         bool _found = false;
         for (uint i = 0; i < organizationUsers[_signature].length; i++) {
             if (organizationUsers[_signature][i] == _user) {
@@ -45,11 +47,11 @@ contract Organizations {
         }
         if (!_found) {
             organizationUsers[_signature].push(_user);
-            emit OrganizationUserAdded(_signature, _user);
+            emit OrganizationUserAdded(_signature, _user, mtxSigner);
         }
     }
 
-    function addUsersToOrganization(string memory _signature, address[] memory _users) public {
+    function addUsersToOrganization(string memory _signature, address[] memory _users) public meta {
         for (uint i = 0; i < _users.length; i++) {
             addUserToOrganization(_signature, _users[i]);
         }
@@ -72,7 +74,7 @@ contract Organizations {
         }
     }
 
-    function removeUserFromOrganization(string memory _signature, address _user) public {
+    function removeUserFromOrganization(string memory _signature, address _user) public meta {
         uint index = 0;
         while (index < organizationUsers[_signature].length) {
             if (organizationUsers[_signature][index] == _user) {
@@ -81,16 +83,16 @@ contract Organizations {
                 index++;
             }
         }
-        emit OrganizationUserRemoved(_signature, _user);
+        emit OrganizationUserRemoved(_signature, _user, mtxSigner);
     }
 
-    function removeUsersFromOrganization(string memory _signature, address[] memory _users) public {
+    function removeUsersFromOrganization(string memory _signature, address[] memory _users) public meta {
         for (uint i = 0; i < _users.length; i++) {
             removeUserFromOrganization(_signature, _users[i]);
         }
     }
 
-    function deleteOrganization(string memory _signature) public {
+    function deleteOrganization(string memory _signature) public meta {
         uint8 i = 0;
         for (i = 0; i < organizations.length; i++) {
             if (keccak256(abi.encodePacked(organizations[i])) == keccak256(abi.encodePacked(_signature))) {
@@ -100,7 +102,7 @@ contract Organizations {
         if (i < organizations.length) {
             delete organizations[i];
             delete organizationUsers[_signature];
-            emit OrganizationDeleted(_signature, true);
+            emit OrganizationDeleted(_signature, true, mtxSigner);
         }
     }
 }
