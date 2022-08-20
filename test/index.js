@@ -8,8 +8,9 @@ const templateRecord = require("./app/templateRecord.test");
 
 // Import Contract Tests
 const recordsContract = require("./contract/records.test");
+
+// Import Contract Tests
 const organizations = require("./contract/Organizations.test");
-const tasks = require("./contract/Tasks.test");
 
 // Import Unit Tests
 const web3MetaTransactionCall = require("./unit/web3MetaTransactionCall.test");
