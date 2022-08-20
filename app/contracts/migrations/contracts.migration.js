@@ -7,4 +7,5 @@ exports.migrateContracts = [
     "VolunteerProfile",
     "Records",
     "Organizations",
+    "Tasks"
 ];
