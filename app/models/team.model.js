@@ -23,12 +23,8 @@ module.exports = (sequelize) => {
     const Team = sequelize.define(modelName, attributes, options);
 
     const associations = {
-        belongsToManyUsers: () => {
-            Team.belongsToMany(models["User"], {
-                through: "UserTeam",
-                as: "users",
-            });
-        },
+        hasManyUsers: () => {/* team has many users */},
+        hasManyTasks: () => {/* team has many tasks */},
     };
 
     const instanceMethods = {};

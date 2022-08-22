@@ -23,6 +23,8 @@ const idrnRoutes = require("./routes/idrn.route");
 const templateRoutes = require("./routes/template.route");
 const recordRoutes = require("./routes/record.route");
 const organizationRoutes = require("./routes/organization.route");
+const taskRoutes = require("./routes/task.route");
+const teamRoutes = require("./routes/team.route");
 
 // API Routes Declare
 app.use("/server", serverRoutes);
@@ -33,6 +35,8 @@ app.use("/idrn", validateServerToken, idrnRoutes);
 app.use("/template", validateServerToken, templateRoutes);
 app.use("/record", validateServerToken, recordRoutes);
 app.use("/organization", validateServerToken, organizationRoutes);
+app.use("/task", validateServerToken, taskRoutes);
+app.use("/team", validateServerToken, teamRoutes);
 
 // Test Routes
 app.get("/test/get", (req, res) => { res.json({ data: "get-route" }); });
