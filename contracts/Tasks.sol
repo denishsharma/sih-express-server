@@ -48,13 +48,13 @@ contract Tasks is MetaTransaction {
         return reportIds;
     }
 
-    function getTicketsFromTask(string _taskId) public returns (string[] memory _ticketIds) {
+    function getTicketsFromTask(string memory _taskId) public returns (string[] memory _ticketIds) {
         _ticketIds = taskHasManyTickets[_taskId];
         emit Op_TicketIds(_ticketIds);
         return _ticketIds;
     }
 
-    function getReportFromTask(string _taskId) public returns (string memory _reportId) {
+    function getReportFromTask(string memory _taskId) public returns (string memory _reportId) {
         _reportId = taskHasOneReport[_taskId];
         emit Op_ReportId(_reportId);
         return _reportId;
@@ -62,7 +62,7 @@ contract Tasks is MetaTransaction {
 
     function _foundTask(string memory _taskId) internal view returns (bool) {
         for (uint i = 0; i < taskIds.length; i++) {
-            if (taskIds[i] == _taskId) {
+            if (keccak256(abi.encodePacked(taskIds[i])) == keccak256(abi.encodePacked(_taskId))) {
                 return true;
             }
         }
@@ -71,7 +71,7 @@ contract Tasks is MetaTransaction {
 
     function _foundTicket(string memory _ticketId) internal view returns (bool) {
         for (uint i = 0; i < ticketIds.length; i++) {
-            if (ticketIds[i] == _ticketId) {
+            if (keccak256(abi.encodePacked(ticketIds[i])) == keccak256(abi.encodePacked(_ticketId))) {
                 return true;
             }
         }
@@ -80,7 +80,7 @@ contract Tasks is MetaTransaction {
 
     function _foundReport(string memory _reportId) internal view returns (bool) {
         for (uint i = 0; i < reportIds.length; i++) {
-            if (reportIds[i] == _reportId) {
+            if (keccak256(abi.encodePacked(reportIds[i])) == keccak256(abi.encodePacked(_reportId))) {
                 return true;
             }
         }
@@ -126,9 +126,9 @@ contract Tasks is MetaTransaction {
         return false;
     }
 
-    function createTask(string _taskId, address _sender) public {
+    function createTask(string memory _taskId, address _sender) public {
         if (taskIds.length > 0) {
-            require(_taskId != taskIds[0]);
+            require(keccak256(abi.encodePacked(_taskId)) != keccak256(abi.encodePacked(taskIds[0])));
         }
         taskIds.push(_taskId);
         taskHasManyTickets[_taskId] = new string[](0);
